@@ -86,23 +86,22 @@ class TimerFragment : Fragment() {
             return
         }
 
-        if (model.getStartTime() == 0L) {
-            model.setStartTime(mins * 60 + secs)
-            model.setEndTime(mins * 60 + secs)
-        } else {
-            model.setStartTime(model.getEndTime())
-        }
+        model.setStartTime(mins * 60 + secs)
+        model.setEndTime(mins * 60 + secs)
 
         watchJob = CoroutineScope(Dispatchers.Default).launch {
             val initialTime = System.nanoTime()
+            delay(2)
             while (!watchJob!!.isCancelled && model.getEndTime() != 0L) {
                 val curTime = System.nanoTime()
                 val passedSeconds = TimeUnit.NANOSECONDS.toSeconds(curTime - initialTime)
                 model.setEndTime(max(0, model.getStartTime() - passedSeconds))
                 delay(100)
             }
-            model.setEndTime(0)
-            model.setStartTime(0)
+            if (!watchJob!!.isCancelled) {
+                model.setEndTime(0)
+                model.setStartTime(0)
+            }
         }
     }
 
